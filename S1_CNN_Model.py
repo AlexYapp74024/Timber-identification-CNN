@@ -1,6 +1,5 @@
 import torchvision
 import torch
-import hubconf
 import os
 from torch import nn, Tensor
 import torch.nn.functional as F
@@ -8,26 +7,7 @@ import cv2
 from PIL import Image
 import numpy as np
 
-model_name = "yolov6s"
-
-from yolov6.models.yolo import Model as YoloModel
-from yolov6.utils.config import Config
-config = Config.fromfile(f"configs/base/{model_name}_base_finetune.py")
 device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-class YoloBackbone(YoloModel):
-    def __init__(self, config, num_classes, device):
-        super().__init__(config, num_classes=num_classes)
-        
-        self.to(device)
-        self.train()
-
-    def forward(self, x:Tensor) -> Tensor:
-        # x = self.backbone.forward(x)
-        # x = self.neck.forward(x)
-        # x = self.detect.forward(x)
-        # _,_,_,x = x
-        return x
 
 class Interpreter(nn.Module):
     def __init__(self, 
@@ -86,15 +66,13 @@ class Interpreter(nn.Module):
 import patchify
 from torchvision import transforms
 
-class YoloTimber(nn.Module):
+class CNN_Model(nn.Module):
     def __init__(self,
                  image_size: tuple[int,int],
-                 yolo_model: YoloBackbone,
                  interpreter: Interpreter,
     ):
         super().__init__()
         self.device = interpreter.device
-        self.yolo_model = yolo_model
         self.image_size = image_size
         self.interpreter = interpreter
 
@@ -111,7 +89,6 @@ class YoloTimber(nn.Module):
         return preds
     
     def forward(self, x:Tensor) -> Tensor:
-        x = self.yolo_model(x)
         x = self.interpreter(x)
         return x
 
@@ -138,33 +115,20 @@ class YoloTimber(nn.Module):
     
 class_count = 41
 
-def build_backbone(device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')) -> YoloBackbone:
-    return YoloBackbone(
-        config = config,
-        num_classes=class_count,
-        device = device
-    )
-
 def build_interpreter(img_size=(640,640), 
-                      yolo_model = None,
                       device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     ) -> Interpreter:
     img_size = list(img_size)
-    if yolo_model == None:
-        yolo_model = build_backbone(device)
 
     x = torch.randn([3]+img_size).view([-1,3]+img_size).to(device)
-    x = yolo_model(x)
         
     return Interpreter(class_count=class_count, sample_yolo_output=x, device=device)
 
 def build_model(img_size = (640,640),
                 device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    ) -> YoloTimber:
-    yolo_model=build_backbone(device)
-    return YoloTimber(yolo_model=yolo_model,
-                      image_size=img_size,
-                      interpreter=build_interpreter(img_size, yolo_model, device))
+    ) -> CNN_Model:
+    return CNN_Model(image_size=img_size, 
+                     interpreter=build_interpreter(img_size, device))
 
 if __name__ == "__main__":
     model = build_model(img_size=(320,320))

@@ -1,21 +1,20 @@
 import gdown
 import os
 import torch
-from S1_YoloTimber import YoloTimber
+from S1_CNN_Model import CNN_Model
 import gradio as gr
 import numpy as np
 import cv2
 import pandas as pd
 
-MODEL_LINK = "https://drive.google.com/file/d/1XMdyxlKg7iliN6ekJVn9v4o6HJCJ-ASb/view?usp=drive_link"
+MODEL_LINK = "https://drive.google.com/file/d/1YUTQlIjNEW8w7Y1kXCOlBNgrgTmdQBoI/view?usp=sharing"
 MODEL_PATH = "model.pt"
 
 if not os.path.exists(MODEL_PATH):
     print("Downloading model . . . ")
     gdown.download(MODEL_LINK,MODEL_PATH,fuzzy=True)
 
-model:YoloTimber = torch.load(MODEL_PATH)
-model.image_size = (320,320)
+model:CNN_Model = torch.load(MODEL_PATH)
 
 def listdir_full(path: str) -> list[str]:
     return [f"{path}/{p}" for p in os.listdir(path)]
