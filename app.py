@@ -5,9 +5,8 @@ from S1_CNN_Model import CNN_Model
 import gradio as gr
 import numpy as np
 import cv2
-import pandas as pd
 
-MODEL_LINK = "https://drive.google.com/file/d/1YUTQlIjNEW8w7Y1kXCOlBNgrgTmdQBoI/view?usp=sharing"
+MODEL_LINK = "https://drive.google.com/file/d/18-t2jMpXLxtqE-8Bu0_NNNuie_mguSON/view?usp=sharing"
 MODEL_PATH = "model.pt"
 
 if not os.path.exists(MODEL_PATH):
