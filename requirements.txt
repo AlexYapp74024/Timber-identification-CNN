@@ -7,4 +7,4 @@ opencv-python==4.9.0.80
 pandas==2.2.1
 patchify==0.2.3
 pillow==10.2.0
-
+torch
