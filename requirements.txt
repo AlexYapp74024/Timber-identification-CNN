@@ -7,7 +7,4 @@ opencv-python==4.9.0.80
 pandas==2.2.1
 patchify==0.2.3
 pillow==10.2.0
-# Editable install with no version control (torch==2.2.0)
--e c:\users\user\miniconda3\envs\fyp\lib\site-packages\torch-2.2.0-py3.10.egg-info
-# Editable install with no version control (torchvision==0.17.0)
--e c:\users\user\miniconda3\envs\fyp\lib\site-packages\torchvision-0.17.0-py3.10.egg-info
+
