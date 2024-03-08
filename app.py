@@ -16,6 +16,7 @@ if not os.path.exists(MODEL_PATH):
 
 model:CNN_Model = torch.load(MODEL_PATH)
 model.to(device)
+model.device = device
 
 def listdir_full(path: str) -> list[str]:
     return [f"{path}/{p}" for p in os.listdir(path)]
