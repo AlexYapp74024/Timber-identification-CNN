@@ -6,6 +6,7 @@ import gradio as gr
 import numpy as np
 import cv2
 
+device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 MODEL_LINK = "https://drive.google.com/file/d/18-t2jMpXLxtqE-8Bu0_NNNuie_mguSON/view?usp=sharing"
 MODEL_PATH = "model.pt"
 
@@ -14,6 +15,7 @@ if not os.path.exists(MODEL_PATH):
     gdown.download(MODEL_LINK,MODEL_PATH,fuzzy=True)
 
 model:CNN_Model = torch.load(MODEL_PATH)
+model.to(device)
 
 def listdir_full(path: str) -> list[str]:
     return [f"{path}/{p}" for p in os.listdir(path)]
