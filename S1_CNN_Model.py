@@ -110,8 +110,11 @@ class CNN_Model(nn.Module):
 
         preds = self.forward(patches)
         _, preds = torch.max(preds,1)
+
+        ratios = preds
         preds = torch.mode(preds, 0).values
-        return preds
+        
+        return ratios, preds
     
 class_count = 41
 

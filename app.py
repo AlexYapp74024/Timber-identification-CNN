@@ -1,4 +1,5 @@
 import gdown
+from collections import Counter
 import os
 import torch
 from S1_CNN_Model import CNN_Model
@@ -45,24 +46,28 @@ def resize_image(img):
 
 PD_COLS=["image","predicted species"]
 MAX_HISTORY = 10
+MAX_PREDS = 10
 
 def classify(image: np.array, history):
     if history == None: history = []
 
     with torch.no_grad():
-        pred = model.predict_large_image(cv2.cvtColor(image, cv2. COLOR_RGB2BGR)).item()
-        pred = labels[pred]
+        r, p = model.predict_large_image(cv2.cvtColor(image, cv2. COLOR_RGB2BGR))
+        ratios = [gr.Textbox(f"{labels[label]}:     {count/len(r)*100:.2f}%",visible=True) 
+                  for label, count in Counter(r.tolist()).most_common()][-MAX_PREDS:]
+        ratios += [gr.Textbox(visible=False)] * (MAX_PREDS - len(ratios))
+        pred = gr.Markdown(f"## Predictions {labels[p.item()]}")
 
-    history += [(resize_image(image), pred)] 
+    history += [(resize_image(image), labels[p.item()])] 
     hist = history[-MAX_HISTORY:]
 
-    return pred, *toggle_history_components(hist), history
+    return pred, *ratios, *toggle_history_components(hist), history
 
 def toggle_history_components(history: list[History]):
     n_hidden = MAX_HISTORY - len(history)
     images, names = list(zip(*history))
 
-    components = [gr.Image(x, visible=True) for x in images]
+    components =  [gr.Image(x, visible=True) for x in images]
     components += [gr.Image(visible=False)] * n_hidden
     components += [gr.Markdown(x, visible=True) for x in names]
     components += [gr.Markdown(visible=False)] * n_hidden
@@ -75,9 +80,13 @@ def classification_tab():
             with gr.Row():
                 submit = gr.Button("Submit", variant='primary')
                 clear  = gr.ClearButton(image)
-        pred = gr.Textbox(label="Prediction")
+        with gr.Column():
+            pred = gr.Markdown("## Predictions")
+            ratios = []
+            for _ in range(MAX_PREDS):
+                ratios.append(gr.Textbox(show_label=False,visible=False))
     
-    return image, submit, clear, pred
+    return image, submit, clear, pred, ratios
 
 MAX_SAMPLE_COUNT = max([len(os.listdir(x)) for x in listdir_full(SAMPLE_DIR)])
 
@@ -136,7 +145,7 @@ with gr.Blocks() as demo:
     history = gr.State([])
     with gr.Tabs() as tabs:
         with gr.Tab("Classification", id=0):
-            image, submit, clear, pred = classification_tab()
+            image, submit, clear, pred, ratios = classification_tab()
         
         with gr.Tab("Samples", id=1):
             sample_tab(image, tabs)
@@ -145,6 +154,6 @@ with gr.Blocks() as demo:
             table_contents = history_tab()
 
             # history = gr.Gallery(interactive=False)
-    submit.click(classify,[image, history],[pred, *table_contents, history])
+    submit.click(classify,[image, history],[pred, *ratios, *table_contents, history])
 
 demo.launch()

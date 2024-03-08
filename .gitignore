@@ -1,2 +1,3 @@
 test.*
 *.pt
+__pycache__/
