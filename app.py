@@ -57,7 +57,7 @@ def classify(image: np.array, history):
                   for label, count in Counter(r.tolist()).most_common()][-MAX_PREDS:]
         ratios += [gr.Textbox(visible=False)] * (MAX_PREDS - len(ratios))
         detail : SpeciesDetail = labels[p.item()]
-        pred = gr.Markdown(f"## Predictions {detail.name} \n {detail.desc} \n\n Find out more: {detail.link}")
+        pred = gr.Markdown(f"## Predictions: {detail.name} \n {detail.desc} \n\n Find out more: {detail.link}")
 
     history += [(resize_image(image), detail.name)] 
     hist = history[-MAX_HISTORY:]
@@ -95,7 +95,7 @@ MAX_SAMPLE_COUNT = max([len(os.listdir(x)) for x in listdir_full(SAMPLE_DIR)])
 def sample_tab(image_input, tabs):
     
     def choose_image(image):
-        return gr.Image(image), gr.Tabs(selected=0)
+        return gr.Image(image), gr.Image(image), gr.Tabs(selected=0)
     
     def refresh_samples(species):
         images = listdir_full(f"{SAMPLE_DIR}/{species}")
@@ -119,7 +119,7 @@ def sample_tab(image_input, tabs):
         
         images.append(image)
         buttons.append(select)
-        select.click(choose_image, image, [image_input, tabs])
+        select.click(choose_image, image, [image, image_input, tabs])
 
     with gr.Row(): [sample_panel() for _ in range(MAX_SAMPLE_COUNT)]
     
