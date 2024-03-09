@@ -6,6 +6,7 @@ from S1_CNN_Model import CNN_Model
 import gradio as gr
 import numpy as np
 import cv2
+from labels import labels, SpeciesDetail
 
 device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 MODEL_LINK = "https://drive.google.com/file/d/18-t2jMpXLxtqE-8Bu0_NNNuie_mguSON/view?usp=sharing"
@@ -22,8 +23,7 @@ model.device = device
 def listdir_full(path: str) -> list[str]:
     return [f"{path}/{p}" for p in os.listdir(path)]
 
-SAMPLE_DIR = "data/image/test_full"
-labels = os.listdir(SAMPLE_DIR)
+label_names = [l.name for l in labels]
 
 class History():
     cols = ["Image", "Prediction"]
@@ -53,12 +53,13 @@ def classify(image: np.array, history):
 
     with torch.no_grad():
         r, p = model.predict_large_image(cv2.cvtColor(image, cv2. COLOR_RGB2BGR))
-        ratios = [gr.Textbox(f"{labels[label]}:     {count/len(r)*100:.2f}%",visible=True) 
+        ratios = [gr.Textbox(f"{label_names[label]}:     {count/len(r)*100:.2f}%",visible=True) 
                   for label, count in Counter(r.tolist()).most_common()][-MAX_PREDS:]
         ratios += [gr.Textbox(visible=False)] * (MAX_PREDS - len(ratios))
-        pred = gr.Markdown(f"## Predictions {labels[p.item()]}")
+        detail : SpeciesDetail = labels[p.item()]
+        pred = gr.Markdown(f"## Predictions {detail.name} \n {detail.desc} \n\n Find out more: {detail.link}")
 
-    history += [(resize_image(image), labels[p.item()])] 
+    history += [(resize_image(image), detail.name)] 
     hist = history[-MAX_HISTORY:]
 
     return pred, *ratios, *toggle_history_components(hist), history
@@ -88,6 +89,7 @@ def classification_tab():
     
     return image, submit, clear, pred, ratios
 
+SAMPLE_DIR = "data/image/test_full"
 MAX_SAMPLE_COUNT = max([len(os.listdir(x)) for x in listdir_full(SAMPLE_DIR)])
 
 def sample_tab(image_input, tabs):
@@ -105,7 +107,7 @@ def sample_tab(image_input, tabs):
         components += [gr.Button(visible=False)] * n_hidden
         return components
 
-    dropdown = gr.Dropdown(labels, label="Species", value="Select a Species")
+    dropdown = gr.Dropdown(label_names, label="Species", value="Select a Species")
 
     images = []
     buttons = []
