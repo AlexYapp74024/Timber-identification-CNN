@@ -1,3 +1,4 @@
+import functools
 import gdown
 from collections import Counter
 import os
@@ -6,7 +7,7 @@ from S1_CNN_Model import CNN_Model
 import gradio as gr
 import numpy as np
 import cv2
-from labels import labels, SpeciesDetail
+from SpeciesDetail import labels, SpeciesDetail
 
 device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 MODEL_LINK = "https://drive.google.com/file/d/18-t2jMpXLxtqE-8Bu0_NNNuie_mguSON/view?usp=sharing"
@@ -32,6 +33,14 @@ class History():
         self.img = resize_image(img)
         self.name = name
 
+import sqlite3
+def fetch_data(id: int):
+    with sqlite3.connect('my_database.db') as conn:
+        c = conn.cursor()
+        c.execute('SELECT * FROM my_table WHERE id = ?', (id,))
+        _, *detail = c.fetchone()
+        return SpeciesDetail(*detail)
+
 MAX_IMG_LEN = 160
 def resize_image(img):
     h, w, _ = img.shape
@@ -56,8 +65,8 @@ def classify(image: np.array, history):
         ratios = [gr.Textbox(f"{label_names[label]}:     {count/len(r)*100:.2f}%",visible=True) 
                   for label, count in Counter(r.tolist()).most_common()][-MAX_PREDS:]
         ratios += [gr.Textbox(visible=False)] * (MAX_PREDS - len(ratios))
-        detail : SpeciesDetail = labels[p.item()]
-        pred = gr.Markdown(f"## Predictions: {detail.name} \n {detail.desc} \n\n Find out more: {detail.link}")
+        detail = fetch_data(p.item())
+        pred = gr.Markdown(detail.result_text())
 
     history += [(resize_image(image), detail.name)] 
     hist = history[-MAX_HISTORY:]
@@ -137,15 +146,21 @@ def history_tab():
     with gr.Column():
       for _ in range(MAX_HISTORY):
         with gr.Row():
-            history_imgs.append(gr.Image(height=200,visible=False))
+            history_imgs.append(gr.Image(height=200,visible=False,scale=0.5))
             history_names.append(gr.Markdown("A",visible=False))
             gr.Markdown("")
 
     return history_imgs + history_names
 
+with open('homepage.md', 'r') as file:
+    home_screen_markdown = file.read()
+
 with gr.Blocks() as demo:
     history = gr.State([])
     with gr.Tabs() as tabs:
+        with gr.Tab("Home", id=3):
+            gr.Markdown(home_screen_markdown)
+
         with gr.Tab("Classification", id=0):
             image, submit, clear, pred, ratios = classification_tab()
         
