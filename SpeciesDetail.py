@@ -8,7 +8,7 @@ class SpeciesDetail():
         self.detail = detail
 
     def result_text(self):
-        detail:str = self.detail
+        detail:str = self.detail if self.detail != None else self.desc
         return f'''## Prediction: {self.name}
 <details>
 <summary>Details</summary>
