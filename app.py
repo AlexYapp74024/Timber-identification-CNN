@@ -146,8 +146,9 @@ def history_tab():
     with gr.Column():
       for _ in range(MAX_HISTORY):
         with gr.Row():
-            history_imgs.append(gr.Image(height=200,visible=False,scale=0.5))
+            history_imgs.append(gr.Image(height=200,visible=False))
             history_names.append(gr.Markdown("A",visible=False))
+            gr.Markdown("")
 
     return history_imgs + history_names
 
