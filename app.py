@@ -68,7 +68,7 @@ def classify(image: np.array, history):
         detail = fetch_data(p.item())
         pred = gr.Markdown(detail.result_text())
 
-    history += [(resize_image(image), detail.name)] 
+    history += [(resize_image(image), f"<h2>{detail.name}</h2> \n {detail.desc}")] 
     hist = history[-MAX_HISTORY:]
 
     return pred, *ratios, *toggle_history_components(hist), history
@@ -140,15 +140,15 @@ def history_tab():
     history_names = []
     with gr.Row():
         gr.Markdown("# Image")
-        gr.Markdown("# Species")
-        gr.Markdown("")
+        with gr.Column(scale=2):
+            gr.Markdown("# Species")
     
     with gr.Column():
       for _ in range(MAX_HISTORY):
         with gr.Row():
             history_imgs.append(gr.Image(height=200,visible=False))
-            history_names.append(gr.Markdown("A",visible=False))
-            gr.Markdown("")
+            with gr.Column(scale=2):
+                history_names.append(gr.Markdown("",visible=False))
 
     return history_imgs + history_names
 

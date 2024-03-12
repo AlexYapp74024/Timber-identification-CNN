@@ -17,7 +17,7 @@ Simply go the the "Samples" tab, choose a species from the dropdown, and select 
 ### Classification Output
 After classification has completed, the predictions results will be shown. The header will be the main predictions. There will also be a dropdown, containing more details of the species. Note some species are more well documented than others, so the length of the details will vary greatly.
 
-Below that are the confidence scores of the prediction, arranged in a decenting order
+Below that are the confidence scores of the prediction, arranged in a descending order
 
 ### Prediction History
 In the "History" tab, the results of previous predictions will be displayed, with the image uploaded and the species predicted.
