@@ -9,3 +9,6 @@ patchify
 pillow
 torch
 torchvision
+tqdm
+requests
+joblib
