@@ -1,12 +1,11 @@
----
-title: Timber Identification CNN
-emoji: 📚
-colorFrom: green
-colorTo: indigo
-sdk: gradio
-sdk_version: 4.20.1
-app_file: app.py
-pinned: false
----
+## Overview
 
-Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
+This is an application developed for my Final Year Project.
+The application predicts timber species based on input images
+
+## Demo
+The updated repo is hosted here, along with the online demo
+https://huggingface.co/spaces/Yapp99/Timber-identification-CNN
+
+Demo video (Ran locally):
+https://github.com/user-attachments/assets/a6a05e9c-571a-497a-9f8d-ea5d33f80984
